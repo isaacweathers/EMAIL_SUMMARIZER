@@ -201,3 +201,9 @@ I'll be using VS Code because although I was a JetBrains afficianado for years, 
 
 #TODO
 Come back and describe more about this and ellaborate on how it goes. Be sure to go through the whole GoogleCloud account setup. 
+
+## Setting up Google
+- Need to enable the GMail API
+- Setup the Desktop Client Key
+- Make a secrets directory to keep the key
+- ensure secrets directory is added to `.gitignore` to prevent it from being uploaded. 
