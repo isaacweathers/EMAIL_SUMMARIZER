@@ -1,5 +1,4 @@
 from __future__ import print_function
-from flask import Flask, render_template
 import base64
 import os
 import json
@@ -9,10 +8,6 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 from dotenv import load_dotenv
-
-# Initialize Flask app
-app = Flask(__name__)
-app.debug = True  # Enable debug mode for better error messages
 
 # Load environment variables from .env file
 load_dotenv()
@@ -50,6 +45,7 @@ def authenticate_gmail():
             # Save the credentials to token.json for reuse
             with open('token.json', 'w') as token:
                 token.write(creds.to_json())
+                print("Credentials saved to token.json")
 
         return creds
     except Exception as e:
@@ -86,35 +82,40 @@ def get_emails(service):
         print(f'An error occurred: {error}')
         return []
 
-@app.route('/')
-def index():
-    """Render the index page with a list of emails."""
-    try:
-        # Check if token.json exists
-        if not os.path.exists('token.json'):
-            return "Authentication required. Please run 'python authenticate.py' first to authenticate with Gmail.", 401
-        
-        # Load credentials from token.json
-        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
-        
-        # Check if credentials are valid
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-                # Save the refreshed credentials
-                with open('token.json', 'w') as token:
-                    token.write(creds.to_json())
-            else:
-                return "Authentication expired. Please run 'python authenticate.py' to re-authenticate.", 401
-        
-        # Build the Gmail service
-        service = build('gmail', 'v1', credentials=creds)
-        
-        # Get emails
-        emails = get_emails(service)
-        return render_template('index.html', emails=emails)
-    except Exception as e:
-        return f"Error: {str(e)}", 500
+def display_emails(emails):
+    """Display emails in the terminal."""
+    if not emails:
+        print("No emails found.")
+        return
+
+    print(f"\nFound {len(emails)} emails:\n")
+    for i, email in enumerate(emails, 1):
+        print(f"Email {i}:")
+        print(f"Subject: {email['subject']}")
+        print(f"Body: {email['body'][:200]}...")  # Show first 200 characters
+        print("-" * 80)
+
+def main():
+    """Main function to authenticate and fetch emails."""
+    print("Starting Gmail email fetcher...")
+    
+    # Authenticate with Gmail
+    creds = authenticate_gmail()
+    
+    # Build the Gmail service
+    service = build('gmail', 'v1', credentials=creds)
+    
+    # Get emails
+    print("Fetching emails...")
+    emails = get_emails(service)
+    
+    # Display emails
+    display_emails(emails)
+    
+    # Save emails to file
+    with open('emails.json', 'w') as f:
+        json.dump(emails, f, indent=4)
+    print("\nEmails saved to emails.json")
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    main() 

@@ -83,7 +83,11 @@ except (json.JSONDecodeError, FileNotFoundError) as e:
 # Summarize the emails
 if emails:
     summarized_emails = summarize_emails(emails)
-    for summary in summarized_emails:
-        print(summary)
+    
+    # Open the file for writing
+    with open('summaries.txt', 'w') as f:  
+        for summary in summarized_emails:
+            print(summary)  # Print to console
+            f.write(summary + '\n')  # Write to file
 else:
     print("No emails to summarize.")

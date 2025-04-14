@@ -7,6 +7,7 @@ asttokens==2.4.1
 attrs==24.2.0
 backcall==0.2.0
 beautifulsoup4==4.12.3
+black==24.10.0
 bleach==6.1.0
 blinker==1.8.2
 build==1.2.2.post1
@@ -64,6 +65,7 @@ mistune==3.0.2
 more-itertools==10.5.0
 msgpack==1.1.0
 multidict==6.1.0
+mypy-extensions==1.0.0
 nbclient==0.10.0
 nbconvert==7.16.4
 nbformat==5.10.4
@@ -72,6 +74,7 @@ openai==0.28.0
 packaging==24.1
 pandocfilters==1.5.1
 parso==0.8.4
+pathspec==0.12.1
 pexpect==4.9.0
 pickleshare==0.7.5
 pip-tools==7.4.1

@@ -64,3 +64,60 @@ if __name__ == '__main__':
     print(emails)
     save_emails_to_file(emails)
     print("Emails saved to emails.json")
+
+from flask import Flask, render_template, send_file, jsonify
+import os
+from visualization import load_analyzed_emails, generate_all_visualizations
+import json
+
+app = Flask(__name__)
+
+# Ensure the static directory exists
+os.makedirs('static', exist_ok=True)
+
+@app.route('/')
+def index():
+    try:
+        # Generate visualizations
+        emails = load_analyzed_emails('emails.json')
+        if not emails:
+            return "No email data found. Please ensure emails.json exists and contains data.", 404
+            
+        generate_all_visualizations(emails)
+        
+        # Get the paths to the generated images
+        charts = {
+            'category': 'category_distribution.png',
+            'sentiment': 'sentiment_trend.png',
+            'priority': 'priority_distribution.png'
+        }
+        
+        return render_template('index.html', charts=charts)
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
+
+@app.route('/summaries')
+def summaries():
+    try:
+        emails = load_analyzed_emails('emails.json')
+        if not emails:
+            return "No email data found. Please ensure emails.json exists and contains data.", 404
+        
+        # Sort emails by date, most recent first
+        emails.sort(key=lambda x: x['date'], reverse=True)
+        return render_template('summaries.html', emails=emails)
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
+
+@app.route('/chart/<chart_name>')
+def get_chart(chart_name):
+    try:
+        chart_path = f'{chart_name}.png'
+        if not os.path.exists(chart_path):
+            return "Chart not found", 404
+        return send_file(chart_path, mimetype='image/png')
+    except Exception as e:
+        return f"An error occurred: {str(e)}", 500
+
+if __name__ == '__main__':
+    app.run(debug=True)
